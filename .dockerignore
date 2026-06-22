@@ -1,0 +1,12 @@
+.git
+.pytest_cache
+.test_tmp
+.venv
+__pycache__
+*.pyc
+data
+docs
+infra
+manual_tests
+tests
+tools

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>ReFilm - Digital Restoration</title>
+    <meta name="application-name" content="ReFilm" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260604-metrics-persist" />
+  </head>
+  <body class="is-booting">
+    <div id="boot-screen" class="boot-screen" aria-live="polite">
+      <div class="boot-frame">
+        <p class="boot-kicker">NATIONAL FILM ARCHIVE</p>
+        <h1 class="boot-logo headline-glitch" data-text="LIVING ARCHIVE">LIVING ARCHIVE</h1>
+        <div id="boot-lines" class="boot-lines"></div>
+        <div class="boot-progress">
+          <span>[</span><span id="boot-bar">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span><span>]</span>
+          <span id="boot-percent">00%</span>
+        </div>
+        <p class="boot-copy">Copyright (c) ReFilm, 2024-2026. Digital Heritage Department.</p>
+      </div>
+    </div>
+
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div id="custom-cursor" class="custom-cursor" aria-hidden="true"></div>
+
+    <div id="app-container" class="app-container reveal-stagger">
+      <header class="topbar">
+        <a class="brand-mark" href="#overview" aria-label="ReFilm">
+          <span class="brand-symbol">&#9635;</span>
+          <span class="brand-name">ReFilm</span>
+        </a>
+        <nav class="topbar-nav" aria-label="Main navigation">
+          <a href="#video-module">Video</a>
+          <a href="#image-module">Photo</a>
+          <a href="#jobs-panel">Jobs</a>
+        </nav>
+        <div class="topbar-status">
+          <span id="active-jobs-count" class="job-count">00 ACTIVE</span>
+        </div>
+      </header>
+
+      <div class="workbench">
+        <aside class="sidebar" aria-label="System modules">
+          <div class="sidebar-group">
+            <p class="sidebar-label">OPERATIONS</p>
+            <a class="sidebar-item active" href="#video-module"><span>01</span> Video module</a>
+            <a class="sidebar-item" href="#image-module"><span>02</span> Photo module</a>
+          </div>
+          <div class="sidebar-group">
+            <p class="sidebar-label">REGISTRY</p>
+            <a class="sidebar-item" href="#jobs-panel"><span>&#9679;</span> Active jobs</a>
+            <button id="sidebar-refresh" class="sidebar-item sidebar-button" type="button"><span>&#8635;</span> Refresh</button>
+          </div>
+        </aside>
+
+        <main class="main-console">
+          <section id="overview" class="console-hero">
+            <h1 class="console-title">
+              ReFilm
+            </h1>
+            <p class="console-subtitle">
+              Restore sharpness, color, and life to old photos and videos with a clear, fast, and reviewable workflow.
+            </p>
+          </section>
+
+          <section class="tools-section" aria-labelledby="tools-title">
+            <div class="section-heading">
+              <h2 id="tools-title">Restoration <em>tools</em></h2>
+            </div>
+
+            <div class="tools-grid">
+              <form id="video-form" class="tool-card" aria-labelledby="video-title">
+                <p class="tool-number">01 - VIDEO MODULE</p>
+                <h3 id="video-title" class="tool-title"><em>Restore</em> Video</h3>
+                <p class="tool-desc">Upload an old video and generate a restored version ready for review.</p>
+
+                <div id="video-module" class="anchor-target"></div>
+                <div class="field">
+                  <label class="field-label" for="video-input">Historical file</label>
+                  <div class="file-drop">
+                    <input id="video-input" name="video" type="file" accept="video/*" required />
+                    <span class="file-drop-icon">&#9636;</span>
+                    <span class="file-drop-text" data-default="Select video file">Select video file</span>
+                    <span class="file-drop-hint">DRAG OR BROWSE / VIDEO</span>
+                  </div>
+                </div>
+
+                <fieldset class="field">
+                  <legend class="field-label">Restoration profile</legend>
+                  <div class="pill-group">
+                    <label class="pill"><input type="radio" name="profile" value="fast" /><span>Fast</span></label>
+                    <label class="pill"><input type="radio" name="profile" value="quality" checked /><span>Quality</span></label>
+                    <label class="pill"><input type="radio" name="profile" value="premium" /><span>Premium</span></label>
+                    <label class="pill"><input type="radio" name="profile" value="ai_realesrgan" /><span>AI Real-ESRGAN</span></label>
+                  </div>
+                </fieldset>
+
+                <fieldset class="field">
+                  <legend class="field-label">Color treatment</legend>
+                  <div class="pill-group">
+                    <label class="pill"><input type="radio" name="color_mode" value="ai_natural" checked /><span>Natural AI</span></label>
+                    <label class="pill"><input type="radio" name="color_mode" value="enhance" /><span>Classic enhance</span></label>
+                    <label class="pill"><input type="radio" name="color_mode" value="none" /><span>No color</span></label>
+                  </div>
+                </fieldset>
+
+                <button type="submit" class="btn-primary">
+                  <span class="btn-text">Start restoration</span>
+                </button>
+                <p id="video-result" class="result" role="status"></p>
+              </form>
+
+              <form id="image-form" class="tool-card" aria-labelledby="image-title">
+                <p class="tool-number">02 - PHOTO MODULE</p>
+                <h3 id="image-title" class="tool-title"><em>Restore</em> Photo</h3>
+                <p class="tool-desc">Enhance old photos while preserving texture and visual memory.</p>
+
+                <div id="image-module" class="anchor-target"></div>
+                <div class="field">
+                  <label class="field-label" for="image-input">Historical image</label>
+                  <div class="file-drop">
+                    <input id="image-input" name="image" type="file" accept="image/*" required />
+                    <span class="file-drop-icon">&#9639;</span>
+                    <span class="file-drop-text" data-default="Select image">Select image</span>
+                    <span class="file-drop-hint">JPG / PNG / TIF</span>
+                  </div>
+                </div>
+
+                <fieldset class="field">
+                  <legend class="field-label">Color treatment</legend>
+                  <div class="pill-group">
+                    <label class="pill"><input type="radio" name="color_mode" value="ai_natural" checked /><span>Natural AI</span></label>
+                    <label class="pill"><input type="radio" name="color_mode" value="enhance" /><span>Classic enhance</span></label>
+                    <label class="pill"><input type="radio" name="color_mode" value="none" /><span>No color</span></label>
+                  </div>
+                </fieldset>
+
+                <button type="submit" class="btn-primary">
+                  <span class="btn-text">Process photo</span>
+                </button>
+                <p id="image-result" class="result" role="status"></p>
+              </form>
+
+            </div>
+          </section>
+
+          <section id="jobs-panel" class="jobs-section" aria-labelledby="jobs-title">
+            <div class="jobs-header">
+              <div>
+                <p class="eyebrow">JOB REGISTRY</p>
+                <h2 id="jobs-title">Restoration <em>jobs</em></h2>
+              </div>
+              <div class="jobs-controls">
+                <span id="auto-indicator" class="auto-indicator"><span>&#9679;</span> AUTO-REFRESH &middot; EVERY 5S</span>
+                <button id="refresh" type="button" class="btn-secondary">
+                  <span class="btn-text">Refresh now</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="job-filters" aria-label="Job filters">
+              <button type="button" class="job-filter active" data-filter="all">All</button>
+              <button type="button" class="job-filter" data-filter="done">Completed</button>
+              <button type="button" class="job-filter" data-filter="processing">Processing</button>
+              <button type="button" class="job-filter" data-filter="video">Video</button>
+              <button type="button" class="job-filter" data-filter="image">Photo</button>
+            </div>
+
+            <div id="jobs" class="jobs"></div>
+          </section>
+
+          <footer class="site-footer">
+            <span>REFILM / TRACEABLE AUDIOVISUAL RESTORATION</span>
+            <span>VERSION 3.2.1</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="/static/app.js?v=20260604-metrics-persist"></script>
+  </body>
+</html>

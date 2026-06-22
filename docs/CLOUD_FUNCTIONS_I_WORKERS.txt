@@ -1,0 +1,103 @@
+ReFilm - treball cloud i invocació
+==================================
+
+Nota important
+--------------
+En aquest projecte no s'han creat Google Cloud Functions clàssiques. El treball cloud està fet amb Cloud Run, Cloud Run Jobs, Cloud Storage, BigQuery, Video Intelligence i un worker Real-ESRGAN preparat per GPU. A l'enunciat es demanen "cloud functions"; en aquest lliurament equivalen als workers i serveis cloud descrits aquí.
+
+Peces cloud implementades
+-------------------------
+1. Web API a Cloud Run
+   - Codi: app/main.py
+   - Infraestructura: infra/main.tf
+   - Imatge: cloudbuild.web.yaml i Dockerfile
+   - Funció: exposa la web FastAPI, rep fitxers, crea jobs i pot delegar renders pesats a Cloud Run Jobs.
+
+2. Worker de render GPU clàssic
+   - Codi: cloud_render_worker/worker.py
+   - Imatge: cloud_render_worker/Dockerfile
+   - Build: cloud_render_worker/cloudbuild.yaml
+   - Job cloud: refilm-render-gpu
+   - Funció: descarrega el vídeo de Cloud Storage, aplica restauració FFmpeg/OpenCV, genera comparació, puja resultats i registra mètriques a BigQuery.
+
+3. Worker Real-ESRGAN GPU
+   - Codi: vertex_realesrgan_worker/worker.py
+   - Imatge: vertex_realesrgan_worker/Dockerfile
+   - Build: vertex_realesrgan_worker/cloudbuild.yaml
+   - Config: vertex_realesrgan_worker/job_config.yaml
+   - Job cloud: refilm-realesrgan-gpu
+   - Funció: executa superresolució Real-ESRGAN x4plus, conserva l'àudio, genera comparació, puja resultats i registra l'execució del model a BigQuery.
+
+4. Despatx de Cloud Run Jobs
+   - Codi: app/cloud_jobs.py i app/services/cloud_dispatcher.py
+   - Funció: invoca un Cloud Run Job existent amb arguments específics de cada vídeo.
+
+5. Cloud Storage
+   - Codi: app/cloud_storage.py i app/cloud_sync.py
+   - Funció: guarda originals, escenes, processats, finals, comparacions, auditories i datasets.
+
+6. BigQuery
+   - Codi: app/bigquery_audit.py
+   - Infraestructura: infra/main.tf
+   - Taules: jobs, job_files, processing_steps, metrics, video_shots, vertex_model_runs i restoration_metrics.
+   - Funció: guarda traçabilitat, mètriques, fitxers i execucions de models.
+
+7. Video Intelligence
+   - Codi: app/video_intelligence.py
+   - Funció: detecta canvis de pla en vídeos guardats a Cloud Storage i registra els shots a BigQuery.
+
+Invocació des de l'aplicació
+----------------------------
+La web rep un vídeo amb:
+
+POST /api/videos
+
+Quan REFILM_CLOUD_ENABLED=true i REFILM_CLOUD_RUN_JOBS_ENABLED=true, app/main.py crida app/services/cloud_dispatcher.py. Aquest servei sincronitza el job a GCS/BigQuery i després crida app/cloud_jobs.py per executar el Cloud Run Job.
+
+Arguments enviats als workers
+-----------------------------
+Els workers reben arguments d'aquest tipus:
+
+--job-id <id del treball>
+--input-uri gs://<bucket>/originals/<job_id>/<fitxer>
+--output-uri gs://<bucket>/final/<job_id>/restored.mp4
+--comparison-uri gs://<bucket>/final/<job_id>/comparison.mp4
+--profile fast|quality|premium|ai_realesrgan
+--colorize true|false
+--color-mode none|enhance|ai_natural
+--color-style historical_natural
+
+Exemple de worker clàssic:
+
+python cloud_render_worker/worker.py --job-id job123 --input-uri gs://bucket/originals/job123/video.mp4 --output-uri gs://bucket/final/job123/restored.mp4 --comparison-uri gs://bucket/final/job123/comparison.mp4 --profile quality --color-mode ai_natural
+
+Exemple de worker Real-ESRGAN:
+
+python vertex_realesrgan_worker/worker.py --job-id job123 --input-uri gs://bucket/originals/job123/video.mp4 --output-uri gs://bucket/final/job123/restored.mp4 --comparison-uri gs://bucket/final/job123/comparison.mp4 --profile ai_realesrgan --model-name RealESRGAN_x4plus --scale 4 --outscale 2.0 --tile 400
+
+Desplegament
+------------
+La infraestructura cloud es defineix a infra/main.tf. El desplegament es fa en dues fases:
+
+1. Crear APIs, bucket, Artifact Registry, comptes de servei, IAM i taules BigQuery.
+2. Construir imatges Docker i tornar a aplicar Terraform amb les imatges dels workers.
+
+Els passos complets són a docs/CLOUD_DEPLOYMENT.md.
+
+Codi cloud inclòs al lliurament
+-------------------------------
+El ZIP inclou el codi complet dels fitxers següents:
+
+- app/cloud_jobs.py
+- app/cloud_storage.py
+- app/cloud_sync.py
+- app/bigquery_audit.py
+- app/video_intelligence.py
+- app/services/cloud_dispatcher.py
+- cloud_render_worker/worker.py
+- vertex_realesrgan_worker/worker.py
+- infra/main.tf
+- infra/variables.tf
+- infra/outputs.tf
+
+Per veure el codi copiat en un únic fitxer de text, consulta docs/CLOUD_CODE_REFERENCE.txt.

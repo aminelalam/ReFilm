@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Versioned ReFilm benchmark manifest. Add reviewed reference/candidate pairs before comparing restoration profiles.",
+  "image_cases": [],
+  "video_cases": []
+}

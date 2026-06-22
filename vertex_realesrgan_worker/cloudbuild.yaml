@@ -1,0 +1,5 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "vertex_realesrgan_worker/Dockerfile", "-t", "${_IMAGE}", "."]
+images:
+  - "${_IMAGE}"
